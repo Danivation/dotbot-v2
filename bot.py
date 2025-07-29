@@ -96,7 +96,7 @@ async def login_cmd(interaction: discord.Interaction, username: str, key: int):
             await interaction.response.send_message("Error authenticating. Please try again.")
             #raise e
         else:
-            await interaction.response.send_message(f"Logged in as {user.get("username")}")
+            await interaction.response.send_message(f"Logged in as {user.get('username')}")
 
     print(f'Command `login` run by {interaction.user.name} returned {user}')
 
