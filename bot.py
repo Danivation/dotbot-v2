@@ -1,5 +1,6 @@
 import discord
 from discord import app_commands
+from discord.ext import tasks
 import requests
 import json
 import os
@@ -10,6 +11,7 @@ import datetime
 import cryptography
 from convex import ConvexClient
 import random
+import asyncio
 
 convex_client = ConvexClient("https://sensible-hawk-744.convex.cloud")
 
@@ -20,9 +22,20 @@ intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client=client)
-list_group = app_commands.Group(name="list", description="List related commands")
+list_group = app_commands.Group(name="list", description="List-related commands")
 
 userCount = json.loads(requests.get('https://sensible-hawk-744.convex.site/users', headers={"X-API-KEY": os.getenv("DOTLIST_DEV_KEY")}).text).get("totalUsers")
+
+@client.event
+async def on_ready():
+    print(f'Logged in as {client.user}')
+    #tree.add_command(list_group)
+    #await tree.sync()
+    status_task.start()
+
+@tasks.loop(minutes=10)
+async def status_task():
+    await client.change_presence(status=discord.Status.online, activity=discord.Activity(name=f"custom", type=discord.ActivityType.custom, state=f"dotlisting with {userCount} users"))
 
 def authenticate(discordUsername: str, login: bool = False) -> str | None:
     userId = keyring.get_password("dotbot_uid", discordUsername)
@@ -56,14 +69,7 @@ def authenticate(discordUsername: str, login: bool = False) -> str | None:
         return currentToken
     return None
 
-@client.event
-async def on_ready():
-    await client.change_presence(status=discord.Status.online, activity=discord.Activity(name=f"custom", type=discord.ActivityType.custom, state=f"dotlisting with {userCount} users"))
-    tree.add_command(list_group)
-    await tree.sync()
-    print(f'Logged in as {client.user}')
-
-@tree.command(name="aadish", description="Aadish message")
+@tree.command(name="radish", description="Aadish message")
 async def aadish_cmd(interaction: discord.Interaction):
     random.seed(int(datetime.datetime.now().timestamp()))
     sel1 = random.random()
